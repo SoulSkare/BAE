@@ -106,47 +106,6 @@ async function run(){
 		})
 	}, intVal)
 
-
-	// fs.writeFile('temp.txt', (err, buff) => {
-	// 	console.log(buff.toString())
-	// })
-
-	// or read line by line:
-	lineReader.open('genkeywords.txt', function(err, reader) {
-	  if (err) throw err;
-	  setInterval(() => {
-	  	  if (reader.hasNextLine()) {
-	  		    reader.nextLine(async function(err, line) {
-	  		      try {
-	  				if (err) throw err;
-
-	  				let searchQuery = `${line} "@gmail.com" "@outlook.com"`
-	  				await BAEmailScraper.start(searchQuery, 1, 3, "myEmailList.txt"); 
-
-	  		        console.log(line);
-	  		      } finally {
-	  		        reader.close(function(err) {
-	  		          if (err) throw err;          
-	  		        });
-	  		      }
-
-	  		    });
-	  	  }
-	  	  else {
-	  	    reader.close(function(err) {
-	  	      if (err) throw err;          
-	  	    });
-	  	  }
-	  	}, 60000)
-
-	});
-
-
-
-
-
-
-
 	console.log('3')
 }
 
