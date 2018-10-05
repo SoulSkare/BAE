@@ -108,7 +108,7 @@ async function run(){
 			    console.log("The quenum was saved!");
 			}); 
 		})
-	}, 60000
+	}, 60000)
 
 
 	// fs.writeFile('temp.txt', (err, buff) => {
