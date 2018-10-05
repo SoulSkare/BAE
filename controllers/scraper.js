@@ -115,16 +115,19 @@ exports.start = function(query, googlePageToStartFrom, maxGooglePage, fileName) 
 
         function sendToEmailList(listId, email){
             const axios = require('axios')
-            axios('http://209.50.50.15:3000/api/subscribe/' + listId + '?access_token=f66990db61ee421fcf9eaf6051716dcfd58ef098', {
-                method: 'POST',
-                header: 'content-type: application/x-www-form-urlencoded',
-                data: {
-                    email: email,
-                    MERGE_CHECKBOX: "yes",
-                    REQUIRE_CONFIRMATION: "no"
-                }
-            })
-            .then(res => console.log(res.data))
+            setTimeout(() => {
+                axios('http://209.50.50.15:3000/api/subscribe/' + listId + '?access_token=f66990db61ee421fcf9eaf6051716dcfd58ef098', {
+                    method: 'POST',
+                    header: 'content-type: application/x-www-form-urlencoded',
+                    data: {
+                        email: email,
+                        MERGE_CHECKBOX: "yes",
+                        REQUIRE_CONFIRMATION: "no"
+                    }
+                })
+                .then(res => console.log(res.data))
+            }, 1500)
+
         }
 
         async function extractEmails(body) {
