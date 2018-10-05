@@ -113,6 +113,10 @@ exports.start = function(query, googlePageToStartFrom, maxGooglePage, fileName) 
         }
         request(options, requestCallback);
 
+        function ranNum(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
         function sendToEmailList(listId, email){
             const axios = require('axios')
             setTimeout(() => {
@@ -126,7 +130,7 @@ exports.start = function(query, googlePageToStartFrom, maxGooglePage, fileName) 
                     }
                 })
                 .then(res => console.log(res.data))
-            }, 2500)
+            }, 2500 + ranNum(500, 2000))
 
         }
 
