@@ -85,30 +85,26 @@ async function run(){
 	    });
 	}
 
-	let getQueNum = get_line('queuenum.txt', 1, (err, line) => {
-		return line
-	})
+	// return
 
+	let intVal = 1000
 	setInterval(() => {
+		intVal = 70000
+		let getQueNum = fs.readFileSync('queuenum.txt', 'utf8')
+		getQueNum = parseInt(getQueNum)
+
 		get_line('./genkeywords.txt', getQueNum, async function(err, line){
-			getQueNum = get_line('queuenum.txt', 1, (err, line) => {
-				return line
-			})
 
 			console.log('The line: ' + line);
 			let searchQuery = `${line} "@gmail.com" "@outlook.com"`
 			await BAEmailScraper.start(searchQuery, 1, 3, "myEmailList.txt"); 
 
 			let incQue = getQueNum + 1
+			console.log(incQue)
 
-			fs.writeFile("queuenum.txt", String(incQue), (err) => {
-			    if(err) {
-			        return console.log(err);
-			    }
-			    console.log("The quenum was saved!");
-			}); 
+			fs.writeFileSync("queuenum.txt", incQue)
 		})
-	}, 60000)
+	}, intVal)
 
 
 	// fs.writeFile('temp.txt', (err, buff) => {
