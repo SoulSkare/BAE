@@ -46,8 +46,8 @@ const BAEmailScraper = require("./controllers/scraper.js");
 // })
 
 
-if(process.argv[2] == null )
-	return console.log('Hey there cowboy, might want to enter in a keyword hey. You lil bitch.')
+// if(process.argv[2] == null )
+// 	return console.log('Hey there cowboy, might want to enter in a keyword hey. You lil bitch.')
 
 
 // fs.writeFile('temp.txt', (err, buff) => {
