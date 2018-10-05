@@ -87,7 +87,7 @@ async function run(){
 
 	// return
 
-	let intVal = 1000
+	let intVal = 6000
 	setInterval(() => {
 		intVal = 70000
 		let getQueNum = fs.readFileSync('queuenum.txt', 'utf8')

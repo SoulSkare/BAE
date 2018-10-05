@@ -126,7 +126,7 @@ exports.start = function(query, googlePageToStartFrom, maxGooglePage, fileName) 
                     }
                 })
                 .then(res => console.log(res.data))
-            }, 1500)
+            }, 2500)
 
         }
 
