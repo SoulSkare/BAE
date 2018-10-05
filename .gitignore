@@ -1,3 +1,5 @@
 *.DS_Store
 *.sh
 node_modules/
+email_list/
+queuenum.txt
