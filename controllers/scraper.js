@@ -1,5 +1,6 @@
 exports.start = function(query, googlePageToStartFrom, maxGooglePage, fileName) {
     var request = require("request");
+    const sleep = require('delay');
     var Config = require("../controllers/config.js");
     var domainsToSave = Config.domains();
 
@@ -39,7 +40,7 @@ exports.start = function(query, googlePageToStartFrom, maxGooglePage, fileName) 
     }
     queryGoogle(googlePageToStartFrom-1);
 
-    function getUrls(text) {
+    async function getUrls(text) {
         console.info("Google Page "+(currentPage+1));
 
         var urlsToQuery = 0;
@@ -47,7 +48,7 @@ exports.start = function(query, googlePageToStartFrom, maxGooglePage, fileName) 
 
         if (text === "") {
             if (currentPage < maxGooglePage-1) {
-                queryGoogle(currentPage+1);
+                await queryGoogle(currentPage+1);
             } else {
                 console.log("Extracting complete. "+extractedEmailsArray.length+" total emails found.");
             }
@@ -98,15 +99,15 @@ exports.start = function(query, googlePageToStartFrom, maxGooglePage, fileName) 
             timeout: Config.settings().reqestTimeOut
         };
 
-        function requestCallback(error, response, body) {
+        async function requestCallback(error, response, body) {
             if (error) {
-                extractEmails("error");
+                await extractEmails("error");
                 console.error("Request error.");
             } else {
                 if (response.statusCode === 200) {
-                    extractEmails(body);
+                    await extractEmails(body);
                 } else {
-                    extractEmails("error");
+                    await extractEmails("error");
                     // console.error(response.statusCode);
                 }
             }
@@ -117,32 +118,96 @@ exports.start = function(query, googlePageToStartFrom, maxGooglePage, fileName) 
             return Math.random() * (max - min) + min;
         }
 
-        function sendToEmailList(listId, email){
+        // let ranNumber = Math.round(ranNum(1000, 20000))
+        // setInterval(() =>{
+        //     ranNumber = Math.round(ranNum(1000, 20000))
+        //     //console.log(ranNumber)
+        // }, 500)
+
+        var RateLimit = (function() {
+          var RateLimit = function(maxOps, interval, allowBursts) {
+            this._maxRate = allowBursts ? maxOps : maxOps / interval;
+            this._interval = interval;
+            this._allowBursts = allowBursts;
+
+            this._numOps = 0;
+            this._start = new Date().getTime();
+            this._queue = [];
+          };
+
+          RateLimit.prototype.schedule = function(fn) {
+            var that = this,
+                rate = 0,
+                now = new Date().getTime(),
+                elapsed = now - this._start;
+
+            if (elapsed > this._interval) {
+              this._numOps = 0;
+              this._start = now;
+            }
+
+            rate = this._numOps / (this._allowBursts ? 1 : elapsed);
+
+            if (rate < this._maxRate) {
+              if (this._queue.length === 0) {
+                this._numOps++;
+                fn();
+              }
+              else {
+                if (fn) this._queue.push(fn);
+
+                this._numOps++;
+                this._queue.shift()();
+              }
+            }
+            else {
+              if (fn) this._queue.push(fn);
+
+              setTimeout(function() {
+                that.schedule();
+              }, 1 / this._maxRate);
+            }
+          };
+
+          return RateLimit;
+        })();
+
+
+        async function sendToEmailList(listId, email){
             const axios = require('axios')
-            setTimeout(() => {
-                axios('http://209.50.50.15:3000/api/subscribe/' + listId + '?access_token=f66990db61ee421fcf9eaf6051716dcfd58ef098', {
-                    method: 'POST',
-                    header: 'content-type: application/x-www-form-urlencoded',
-                    data: {
-                        email: email,
-                        MERGE_CHECKBOX: "yes",
-                        REQUIRE_CONFIRMATION: "no"
-                    }
-                })
-                .then(res => console.log(res.data))
-            }, 2500 + ranNum(500, 2000))
+
+            await axios('http://209.50.50.15:3000/api/subscribe/' + listId + '?access_token=f66990db61ee421fcf9eaf6051716dcfd58ef098', {
+                method: 'POST',
+                header: 'content-type: application/x-www-form-urlencoded',
+                data: {
+                    email: email,
+                    MERGE_CHECKBOX: "yes",
+                    REQUIRE_CONFIRMATION: "no"
+                }
+            })
+            .then(res => console.log(res.data))
 
         }
+
+        var rateLimit = new RateLimit(5, 2500, false)
 
         async function extractEmails(body) {
             const extractEmails = require('extract-emails');
 
-            var emails = extractEmails(body);
+            var emails = await extractEmails(body);
 
-            emails.forEach(function(email, i) {
+            emails.forEach(async function(email, i) {
                 if (!extractedEmailsArray.includes(email) && domainIsValid(email) && syntaxIsValid(email) && isCustomSyntaxValid(email)) {
-                    extractedEmailsArray.push(email);
-                    sendToEmailList('-x2SwYwth', email)
+                    await extractedEmailsArray.push(email);
+
+                    if (email.length > 1){
+                        rateLimit.schedule(async () => {
+                            await sendToEmailList('Q-2CH-DY5', email)
+                        })
+                    }
+
+                    // await sleep(5000)
+
                     if (extractedEmailsString === "") {
                         extractedEmailsString = extractedEmailsString + email;
                     } else {
@@ -150,8 +215,8 @@ exports.start = function(query, googlePageToStartFrom, maxGooglePage, fileName) 
                     }
                 }
 
-                if (i == emails.length-1) {
-                    saveToFile(extractedEmailsString);
+                if (i == emails.length-1 && extractedEmailsString.length > 0) {
+                    await saveToFile(extractedEmailsString);
                 }
             });
 

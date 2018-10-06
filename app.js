@@ -9,6 +9,7 @@
 const fs = require('fs')
 var lineReader = require('line-reader');
 const BAEmailScraper = require("./controllers/scraper.js");
+const sleep = require('delay');
 // const mongoose = require('mongoose')
 
 // mongoose.Promise = global.Promise
@@ -87,9 +88,7 @@ async function run(){
 
 	// return
 
-	let intVal = 6000
-	setInterval(() => {
-		intVal = 70000
+	function runner(){
 		let getQueNum = fs.readFileSync('queuenum.txt', 'utf8')
 		getQueNum = parseInt(getQueNum)
 
@@ -97,6 +96,7 @@ async function run(){
 
 			console.log('The line: ' + line);
 			let searchQuery = `${line} "@gmail.com" "@outlook.com"`
+
 			await BAEmailScraper.start(searchQuery, 1, 3, "myEmailList.txt"); 
 
 			let incQue = getQueNum + 1
@@ -104,7 +104,14 @@ async function run(){
 
 			fs.writeFileSync("queuenum.txt", incQue)
 		})
-	}, intVal)
+	}
+
+	runner()
+
+
+	setInterval(() => {
+		runner()
+	}, 60000)
 
 	console.log('3')
 }
