@@ -3,3 +3,4 @@
 node_modules/
 email_list/
 queuenum.txt
+.env

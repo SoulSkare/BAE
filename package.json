@@ -7,6 +7,7 @@
     "axios": "^0.18.0",
     "connect-mongo": "^2.0.1",
     "delay": "^4.0.1",
+    "dotenv": "^6.0.0",
     "extract-emails": "0.0.5",
     "fs": "0.0.1-security",
     "get-urls": "^7.2.0",

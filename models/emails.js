@@ -5,12 +5,10 @@ const Schema = mongoose.Schema
 mongoose.set('useCreateIndex', true)
 
 const emailsSchema = new Schema({
-	list: [{
-		num: Number,
-		emails: Array,
-		queue: Number,
-		lastEmail: String
-	}]
+	listId: String,
+	emails: Array,
+	queue: Number,
+	lastEmail: String
 })
 
 const Emails = mongoose.model('Emails', emailsSchema, 'emails')

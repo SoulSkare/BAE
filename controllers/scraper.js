@@ -1,6 +1,8 @@
 exports.start = function(query, googlePageToStartFrom, maxGooglePage, fileName) {
     var request = require("request");
     const sleep = require('delay');
+    const dotenv = require('dotenv').config()
+
     var Config = require("../controllers/config.js");
     var domainsToSave = Config.domains();
 
@@ -173,10 +175,10 @@ exports.start = function(query, googlePageToStartFrom, maxGooglePage, fileName) 
         })();
 
 
-        async function sendToEmailList(listId, email){
+        async function sendToEmailList(email){
             const axios = require('axios')
 
-            await axios('http://209.50.50.15:3000/api/subscribe/' + listId + '?access_token=f66990db61ee421fcf9eaf6051716dcfd58ef098', {
+            await axios('http://' + process.env.MAILTRAIN_HOST_ADDRESS + '/api/subscribe/' + process.env.MAILTRAIN_LIST_ID + '?access_token=' + process.env.MAILTRAIN_ACCESS_TOKEN, {
                 method: 'POST',
                 header: 'content-type: application/x-www-form-urlencoded',
                 data: {
@@ -189,7 +191,7 @@ exports.start = function(query, googlePageToStartFrom, maxGooglePage, fileName) 
 
         }
 
-        var rateLimit = new RateLimit(5, 2500, false)
+        var rateLimit = new RateLimit(1, 3000, true)
 
         async function extractEmails(body) {
             const extractEmails = require('extract-emails');
@@ -201,9 +203,14 @@ exports.start = function(query, googlePageToStartFrom, maxGooglePage, fileName) 
                     await extractedEmailsArray.push(email);
 
                     if (email.length > 1){
-                        rateLimit.schedule(async () => {
-                            await sendToEmailList('Q-2CH-DY5', email)
-                        })
+                        if (process.env.RATE_LIMIT === 'true'){
+                            rateLimit.schedule(async () => {
+                                await sendToEmailList(email)
+                            })
+                        }else{
+                            await sendToEmailList(email)
+                        }
+
                     }
 
                     // await sleep(5000)
@@ -216,7 +223,9 @@ exports.start = function(query, googlePageToStartFrom, maxGooglePage, fileName) 
                 }
 
                 if (i == emails.length-1 && extractedEmailsString.length > 0) {
-                    await saveToFile(extractedEmailsString);
+                    if (process.env.SAVE_TO_FILE === 'true'){
+                       await saveToFile(extractedEmailsString);
+                    }
                 }
             });
 
