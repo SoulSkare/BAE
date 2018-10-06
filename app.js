@@ -111,7 +111,7 @@ async function run(){
 
 	setInterval(() => {
 		runner()
-	}, 60000)
+	}, 12000)
 
 	console.log('3')
 }
